@@ -1,3 +1,7 @@
+#distribution folder
+dist
+
+
 # Logs
 logs
 *.log
