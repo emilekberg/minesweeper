@@ -9,7 +9,7 @@ export const southEast = { x: 1, y: 1 };
 /**
  * 
  */
-export const neighbourPositions = [
+export const adjacentPositions = [
   northWest, north, northEast,
   west,             east,
   southWest, south, southEast

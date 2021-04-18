@@ -18,4 +18,4 @@
   }
 </style>
 
-<span class="neighbour-count count-{value}">{value}</span>
+<span class="adjacent-count count-{value}">{value}</span>

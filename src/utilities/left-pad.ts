@@ -1,4 +1,4 @@
-export default function leftPad(value: any, minLength: number, letter: string): string {
+export default function leftPad(value: string|number|boolean, minLength: number, letter: string): string {
   let valueString = value.toString();
   if(valueString.length >= minLength) {
     return valueString;

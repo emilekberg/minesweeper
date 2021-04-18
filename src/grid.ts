@@ -1,4 +1,4 @@
-import { neighbourPositions } from "./constants/neighbour-positions";
+import { adjacentPositions } from "./constants/adjacent-positions";
 
 export default class Grid<T> {
   width: number;
@@ -67,7 +67,7 @@ export default class Grid<T> {
 
   getAdjacentTilePositions(startX: number, startY: number): Array<{ x: number, y: number }> {
     const result = [];
-    for (const adjacent of neighbourPositions) {
+    for (const adjacent of adjacentPositions) {
       const x = startX + adjacent.x;
       const y = startY + adjacent.y;
       if (!this.isPointWithinBoundries(x, y)) continue;

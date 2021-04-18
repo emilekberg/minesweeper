@@ -7,8 +7,8 @@
 
 <div class="back-face">
   {#if cellData.isMine}<Mine />{/if}
-  {#if cellData.numNeighborMines > 0}<Number
-      value={cellData.numNeighborMines}
+  {#if cellData.numAdjacentMines > 0}<Number
+      value={cellData.numAdjacentMines}
     />
   {/if}
 </div>

@@ -1,5 +1,4 @@
 import type CellData from "./interfaces/cell-data";
-import { neighbourPositions } from './constants/neighbour-positions';
 import Result from "./constants/result";
 import Grid from "./grid";
 /**
@@ -38,7 +37,7 @@ export default class MineSweeper {
         y,
         isMine: false,
         hasFlag: false,
-        numNeighborMines: 0,
+        numAdjacentMines: 0,
         isRevealed: false
       }
     });
@@ -62,7 +61,7 @@ export default class MineSweeper {
       const data = this.grid.getDataFromIndex(i);
       const adjacent = this.grid.getAdjacentTilePositions(data.x, data.y);
       const numAdjacentMines = adjacent.filter(pos => this.grid.get(pos.x, pos.y).isMine).length;
-      data.numNeighborMines = numAdjacentMines;
+      data.numAdjacentMines = numAdjacentMines;
     }
   }
 
@@ -80,7 +79,7 @@ export default class MineSweeper {
    * @param y 
    * @returns 
    */
-  protected reveal(x: number, y: number) {
+  public reveal(x: number, y: number) {
     const data = this.grid.get(x, y);
     if (data.isRevealed) {
       return;
@@ -91,14 +90,14 @@ export default class MineSweeper {
       return;
     }
     data.isRevealed = true;
-    if (data.numNeighborMines > 0) {
+    if (data.numAdjacentMines > 0) {
       // return since we should only reveal single digit here.
       return;
     }
-    // if the clicked square is blank, traverse neighbour cells
+    // if the clicked square is blank, traverse adjacent cells
     // and reveal them.
     const result: CellData[] = [];
-    this.getNeighboursWithoutMine(x, y, result);
+    this.getAdjacentWithoutMine(x, y, result);
     this.revealList(result);
     this.checkWinCondition();
   }
@@ -123,14 +122,14 @@ export default class MineSweeper {
   }
 
   /**
-   * Traverses neighbouring nodes of the specified position.
+   * Traverses adjacent nodes of the specified position.
    * Adds them to the out array if they're not present already
    * and recursivly traverse the array with nodes left.
    * @param x 
    * @param y 
    * @param out 
    */
-  protected getNeighboursWithoutMine(startX: number, startY: number, out: CellData[]) {
+  protected getAdjacentWithoutMine(startX: number, startY: number, out: CellData[]) {
     const adjacentTiles = this.grid.getAdjacentTilePositions(startX, startY);
     for (const { x, y } of adjacentTiles) {
       const data = this.grid.get(x, y);
@@ -141,10 +140,10 @@ export default class MineSweeper {
         continue;
       }
       out.push(data);
-      if (data.numNeighborMines > 0) {
+      if (data.numAdjacentMines > 0) {
         continue;
       }
-      this.getNeighboursWithoutMine(x, y, out);
+      this.getAdjacentWithoutMine(x, y, out);
     }
   }
 
@@ -158,6 +157,9 @@ export default class MineSweeper {
 
   public hasGameFinished(): boolean {
     if (this.gameResult === undefined) {
+      return false;
+    }
+    if (this.gameResult === Result.ONGOING) {
       return false;
     }
     return true;
