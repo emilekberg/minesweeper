@@ -5,6 +5,7 @@
   span {
     font-family: 'Varela Round', sans-serif;
     font-size: 2rem;
+    color: red;
   }
   .count-1 {
     color: yellow;
@@ -14,9 +15,6 @@
   }
   .count-3 {
     color: orangered;
-  }
-  .count-4 {
-    color: red;
   }
 </style>
 

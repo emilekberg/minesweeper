@@ -1,10 +1,9 @@
 <script lang="ts">
   import type MineSweeper from "../mine-sweeper";
-  import Mine from "./faces/mine.svelte";
-  import Number from "./faces/number.svelte";
-  import Flag from "./faces/flag.svelte";
+  import Front from './faces/front.svelte';
+  import Back from './faces/back.svelte';
   import Card from "./card.svelte";
-  import type CellData from "./cell-data";
+  import type CellData from "../interfaces/cell-data";
   export let game: MineSweeper;
   game.init(10, 10, 10);
   let lastClick = {
@@ -42,7 +41,7 @@
   }
 
   function getAnimationDelay(x: number, y: number) {
-    if (game.isGameOver()) {
+    if (game.hasGameFinished()) {
       return 0;
     }
 
@@ -65,14 +64,10 @@
           }}
         >
           <div slot="front">
-            {#if cellData.hasFlag}<Flag />{/if}
+            <Front cellData={cellData} />
           </div>
           <div slot="back">
-            {#if cellData.isMine}<Mine />{/if}
-            {#if cellData.numNeighborMines > 0}<Number
-                value={cellData.numNeighborMines}
-              />
-            {/if}
+            <Back cellData={cellData} />
           </div>
         </Card>
       {/each}

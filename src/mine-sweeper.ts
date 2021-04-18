@@ -1,23 +1,22 @@
-import type CellData from "./components/cell-data";
+import type CellData from "./interfaces/cell-data";
 import { neighbourPositions } from './constants/neighbour-positions';
+import Result from "./constants/result";
+import Grid from "./grid";
 /**
  * Minesweeper game.
  */
 export default class MineSweeper {
-  protected _isGameOver: boolean = false;
+  protected gameResult: Result | undefined;
+  protected grid: Grid<CellData>;
+
   /**
-   * Container for the cells.
-   * Store multi-dimentional array in a single-dimension array.
+   * Number of mines in the current game.
    */
-  protected data: CellData[];
-  /**
-   * Width of the game grid.
-   */
-  protected width: number;
-  /**
-   * Height of the game grid.
-   */
-  protected height: number
+  protected numberOfMines: number;
+
+  constructor() {
+    this.grid = new Grid();
+  }
 
   /**
    * Initializes a new game.
@@ -25,54 +24,53 @@ export default class MineSweeper {
    * @param height 
    * @param numMines 
    */
-  init(width: number, height: number, numMines: number) {
-    this._isGameOver = false;
-    this.width = width;
-    this.height = height;
-    this.data = [];
-    for (let i = 0; i < width * height; i++) {
-      const x = i % width;
-      const y = Math.floor(i / width);
-      this.data.push({
+  public init(width: number, height: number, numMines: number) {
+    this.gameResult = undefined;
+    this.generateGrid(width, height);
+    this.generateMines(numMines);
+    this.generateAdjacentMineNumbers();
+  }
+
+  protected generateGrid(width: number, height: number) {
+    this.grid.init(width, height, (_, { x, y }) => {
+      return {
         x,
         y,
         isMine: false,
         hasFlag: false,
         numNeighborMines: 0,
         isRevealed: false
-      });
-      
-    }
-
-    for (let i = 0; i < numMines; i++) {
-      const index = Math.floor(Math.random() * this.data.length);
-      this.data[index].isMine = true;
-    }
-
-    for (let i = 0; i < this.data.length; i++) {
-      if (this.data[i].isMine) continue;
-      let numNeighbours = 0;
-      const position = this.data[i];
-  
-      for (const neighbour of neighbourPositions) {
-        const x = position.x + neighbour.x;
-        const y = position.y + neighbour.y;
-        if (!this.isPointWithinBoundries(x, y)) continue;
-        const neighbourId = y * width + x;
-        if (this.data[neighbourId].isMine) {
-          numNeighbours++;
-        }
       }
-      position.numNeighborMines = numNeighbours;
+    });
+  }
+
+  protected generateMines(numberOfMines: number) {
+    this.numberOfMines = numberOfMines;
+    // generate unique mines by cloning data 
+    // and removing available positions after each generation.
+    const availablePositions = this.grid.data.concat();
+    for (let i = 0; i < numberOfMines; i++) {
+      let index: number = Math.floor(Math.random() * availablePositions.length);
+      this.grid.getDataFromIndex(index).isMine = true;
+      availablePositions.splice(index, 1);
     }
   }
 
-  toggleFlag(x: number, y: number) {
-    if (!this.isPointWithinBoundries(x, y)) {
+  protected generateAdjacentMineNumbers() {
+    for (let i = 0; i < this.grid.width * this.grid.height; i++) {
+      if (this.grid.getDataFromIndex(i).isMine) continue;
+      const data = this.grid.getDataFromIndex(i);
+      const adjacent = this.grid.getAdjacentTilePositions(data.x, data.y);
+      const numAdjacentMines = adjacent.filter(pos => this.grid.get(pos.x, pos.y).isMine).length;
+      data.numNeighborMines = numAdjacentMines;
+    }
+  }
+
+  public toggleFlag(x: number, y: number) {
+    if (!this.grid.isPointWithinBoundries(x, y)) {
       return;
     }
-    const index = y * this.width + x;
-    this.data[index].hasFlag = !this.data[index].hasFlag;
+    this.grid.get(x, y).hasFlag = !this.grid.get(x, y).hasFlag;
   }
 
   /**
@@ -82,18 +80,18 @@ export default class MineSweeper {
    * @param y 
    * @returns 
    */
-  reveal(x: number, y: number) {
-    const index = y * this.width + x;
-    if (this.data[index].isRevealed) {
+  protected reveal(x: number, y: number) {
+    const data = this.grid.get(x, y);
+    if (data.isRevealed) {
       return;
     }
-    if (this.data[index].isMine) {
-      this.revealList(this.data);
-      this._isGameOver = true;
-      return; 
+    if (data.isMine) {
+      this.revealList(this.grid.data);
+      this.gameResult = Result.LOST;
+      return;
     }
-    this.data[index].isRevealed = true;
-    if (this.data[index].numNeighborMines > 0) {
+    data.isRevealed = true;
+    if (data.numNeighborMines > 0) {
       // return since we should only reveal single digit here.
       return;
     }
@@ -102,6 +100,7 @@ export default class MineSweeper {
     const result: CellData[] = [];
     this.getNeighboursWithoutMine(x, y, result);
     this.revealList(result);
+    this.checkWinCondition();
   }
 
   /**
@@ -109,8 +108,18 @@ export default class MineSweeper {
    * This means they will be rendered.
    * @param toReveal 
    */
-  revealList(toReveal: CellData[]) {
+  protected revealList(toReveal: CellData[]) {
     toReveal.forEach(x => x.isRevealed = true);
+  }
+
+  protected checkWinCondition() {
+    var unrevealed = this.grid.data.filter(x => !x.isRevealed);
+    if (unrevealed.length === this.numberOfMines) {
+      this.gameResult = Result.WON;
+      alert('you won!');
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -121,24 +130,21 @@ export default class MineSweeper {
    * @param y 
    * @param out 
    */
-  getNeighboursWithoutMine(x: number, y: number, out: CellData[]) {
-    for (const pos of neighbourPositions) {
-      const checkX = pos.x + x;
-      const checkY = pos.y + y;
-      if (!this.isPointWithinBoundries(checkX, checkY)) continue;
-      const index = checkY * this.width + checkX;
-      const cell = this.data[index];
-      if (cell.isMine) {
+  protected getNeighboursWithoutMine(startX: number, startY: number, out: CellData[]) {
+    const adjacentTiles = this.grid.getAdjacentTilePositions(startX, startY);
+    for (const { x, y } of adjacentTiles) {
+      const data = this.grid.get(x, y);
+      if (data.isMine) {
         continue;
       }
-      if (out.find(x => x.x === checkX && x.y === checkY)) {
+      if (out.find(pos => pos.x === x && pos.y === y)) {
         continue;
       }
-      out.push(cell);
-      if (cell.numNeighborMines > 0) {
+      out.push(data);
+      if (data.numNeighborMines > 0) {
         continue;
       }
-      this.getNeighboursWithoutMine(checkX, checkY, out);
+      this.getNeighboursWithoutMine(x, y, out);
     }
   }
 
@@ -147,24 +153,17 @@ export default class MineSweeper {
    * @returns 
    */
   public getData(): Readonly<CellData[]> {
-    return this.data;
+    return this.grid.data;
   }
 
-  /**
-   * Validates that the provided point is within the broundries
-   * of the grid.
-   * @param x 
-   * @param y 
-   * @returns 
-   */
-  isPointWithinBoundries(x: number, y: number): boolean {
-      if (x < 0 || x >= this.width) return false;
-      if (y < 0 || y >= this.height) return false;
-      return true;
+  public hasGameFinished(): boolean {
+    if (this.gameResult === undefined) {
+      return false;
     }
-  
-  
-  isGameOver(): boolean {
-    return this._isGameOver;
+    return true;
+  }
+
+  public getGameResult(): Result {
+    return this.gameResult;
   }
 }

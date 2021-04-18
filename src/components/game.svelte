@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 import MineSweeper from "../mine-sweeper";
 
   import Grid from "./grid.svelte";
@@ -17,6 +17,6 @@ import MineSweeper from "../mine-sweeper";
 
 <div>
   <h1>Mine sweeper</h1>
-  <Timer active={!game.isGameOver()}/>
-  <Grid game={game} width=10 height=10 numMines=10 />
+  <Timer />
+  <Grid game={game} />
 </div>
