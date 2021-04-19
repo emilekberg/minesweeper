@@ -5,13 +5,13 @@
   import Card from "./card.svelte";
   import type CellData from "../interfaces/cell-data";
   import { beforeUpdate, createEventDispatcher } from "svelte";
+import Solver from "../solver";
   export const game = new MineSweeper();
-
   const dispatch = createEventDispatcher();
   function gameEnd() {
     dispatch('end');
   }
-
+  const solver = new Solver();
 
   game.init(10, 10, 10);
   let lastClick = {
@@ -23,6 +23,7 @@
 
   let gameFinished = false;
   beforeUpdate(() => {
+    solver.generateScores(game.grid);
     gameFinished = game.hasGameFinished();
     if(gameFinished) {
       gameEnd();

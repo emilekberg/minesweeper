@@ -1,7 +1,6 @@
 <script lang="ts">
   import Game from "./game.svelte";
   import Timer from "./timer.svelte";
-
   let gameActive = true;
   function onGameEnd(e) {
     console.log(e);
@@ -22,6 +21,6 @@
 </style>
 <div>
   <h1>Minesweeper</h1>
-  <Timer />
+  <Timer active={gameActive} />
   <Game on:end={onGameEnd} />
 </div>

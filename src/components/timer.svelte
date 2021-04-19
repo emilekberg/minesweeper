@@ -1,28 +1,46 @@
 <script lang="ts">
-  import leftPad from "../utilities/left-pad";
-  let hours = 0;
-  let minutes = 0;
-  let seconds = 0;
+  import { beforeUpdate } from "svelte";
 
-  let intervalInstance = setInterval(() => {
-    seconds++;
-    if(seconds >= 60) {
-      seconds = 0;
-      minutes++;
-    }
-    if(minutes >= 60) {
-      minutes = 0;
-      hours++;
-    }
-  }, 1000);
+  export let active: boolean = true;
+  let intervalInstance: number | undefined = undefined;
+  let startTime: number|undefined;
+  let currentTime: number|undefined;
 
-  function formatTime(hours: number, minutes: number, seconds: number): string {
-    const hoursString = leftPad(hours, 2, '0');
-    const minutesString = leftPad(minutes, 2, '0');
-    const secondsString = leftPad(seconds, 2, '0');
-    return `${hoursString}:${minutesString}:${secondsString}`;
+  beforeUpdate(() => {
+    if (active) {
+      start();
+    } else {
+      stop();
+    }
+  });
+
+  function start() {
+    if (intervalInstance !== undefined) return;
+    startTime = Date.now();
+    intervalInstance = setInterval(() => {
+      currentTime = Date.now();
+    }, 10);
+  }
+  function stop() {
+    if (intervalInstance === undefined) return;
+    clearInterval(intervalInstance);
+    intervalInstance = undefined;
+  }
+
+  function formatTime(start, current): string {
+    if(!start && !current) return;
+    const diffInSeconds = (current - start) / 1000;
+    
+    var seconds = Math.floor(diffInSeconds % 60);
+    var ms = Math.floor((diffInSeconds - seconds) * 1000);
+    var minutes = Math.floor((diffInSeconds / 60) % 60);
+    var hours = Math.floor(diffInSeconds / 60 / 60);
+    const hoursString = hours.toString().padStart(2, '0');
+    const minutesString = minutes.toString().padStart(2, '0');
+    const secondsString = seconds.toString().padStart(2, '0');
+    const msString = ms.toString().padStart(3, '0');
+    return `${hoursString}:${minutesString}:${secondsString}.${msString}`;
   }
 </script>
-<div>
-  Time: <span>{formatTime(hours, minutes, seconds)}</span>
-</div>
+
+<span>{formatTime(startTime, currentTime)}</span>

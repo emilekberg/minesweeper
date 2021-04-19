@@ -6,7 +6,7 @@ import Grid from "./grid";
  */
 export default class MineSweeper {
   protected gameResult: Result | undefined;
-  protected grid: Grid<CellData>;
+  grid: Grid<CellData>;
 
   /**
    * Number of mines in the current game.
@@ -60,8 +60,7 @@ export default class MineSweeper {
       if (this.grid.getDataFromIndex(i).isMine) continue;
       const data = this.grid.getDataFromIndex(i);
       const adjacent = this.grid.getAdjacentTilePositions(data.x, data.y);
-      const numAdjacentMines = adjacent.filter(pos => this.grid.get(pos.x, pos.y).isMine).length;
-      data.numAdjacentMines = numAdjacentMines;
+      data.numAdjacentMines = adjacent.filter(pos => this.grid.get(pos.x, pos.y).isMine).length;
     }
   }
 
