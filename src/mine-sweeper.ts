@@ -1,6 +1,7 @@
 import type CellData from "./interfaces/cell-data";
 import Result from "./constants/result";
 import Grid from "./grid";
+import Markers from "./constants/markers";
 /**
  * Minesweeper game.
  */
@@ -36,7 +37,7 @@ export default class MineSweeper {
         x,
         y,
         isMine: false,
-        hasFlag: false,
+        icon: Markers.NONE,
         numAdjacentMines: 0,
         isRevealed: false
       }
@@ -64,11 +65,11 @@ export default class MineSweeper {
     }
   }
 
-  public toggleFlag(x: number, y: number) {
+  public toggleIcon(x: number, y: number) {
     if (!this.grid.isPointWithinBoundries(x, y)) {
       return;
     }
-    this.grid.get(x, y).hasFlag = !this.grid.get(x, y).hasFlag;
+    this.grid.get(x, y).icon = ++this.grid.get(x, y).icon % 3;
   }
 
   /**
@@ -90,6 +91,7 @@ export default class MineSweeper {
     }
     data.isRevealed = true;
     if (data.numAdjacentMines > 0) {
+      this.checkWinCondition();
       // return since we should only reveal single digit here.
       return;
     }
@@ -114,7 +116,6 @@ export default class MineSweeper {
     var unrevealed = this.grid.data.filter(x => !x.isRevealed);
     if (unrevealed.length === this.numberOfMines) {
       this.gameResult = Result.WON;
-      alert('you won!');
       return true;
     }
     return false;
@@ -146,10 +147,6 @@ export default class MineSweeper {
     }
   }
 
-  /**
-   * Returns a soft-readonly copy of the cell data.
-   * @returns 
-   */
   public getData(): Readonly<CellData[]> {
     return this.grid.data;
   }

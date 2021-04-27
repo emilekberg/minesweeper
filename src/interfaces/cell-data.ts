@@ -1,7 +1,9 @@
+import type Markers from "../constants/markers";
+
 export interface CellData {
   x: number;
   y: number;
-  hasFlag: boolean;
+  icon: Markers;
   isRevealed: boolean;
   isMine: boolean;
   numAdjacentMines: number;

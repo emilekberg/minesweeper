@@ -5,15 +5,18 @@
   import Card from "./card.svelte";
   import type CellData from "../interfaces/cell-data";
   import { beforeUpdate, createEventDispatcher } from "svelte";
-import Solver from "../solver";
   export const game = new MineSweeper();
+  export let width: number = 10;
+  export let height: number = 10;
+  export let numberOfMines: number = 10;
+
+
   const dispatch = createEventDispatcher();
   function gameEnd() {
-    dispatch('end');
+    dispatch("end");
   }
-  const solver = new Solver();
 
-  game.init(10, 10, 10);
+  game.init(width, height, numberOfMines);
   let lastClick = {
     x: 0,
     y: 0,
@@ -23,9 +26,8 @@ import Solver from "../solver";
 
   let gameFinished = false;
   beforeUpdate(() => {
-    solver.generateScores(game.grid);
     gameFinished = game.hasGameFinished();
-    if(gameFinished) {
+    if (gameFinished) {
       gameEnd();
     }
   });
@@ -51,7 +53,7 @@ import Solver from "../solver";
     if (game.hasGameFinished()) {
       return;
     }
-    game.toggleFlag(x, y);
+    game.toggleIcon(x, y);
     grid = getGrid(game.getData());
   }
 

@@ -27,12 +27,12 @@
     intervalInstance = undefined;
   }
 
-  function formatTime(start, current): string {
+  function formatTime(start: number, current: number): string {
     if(!start && !current) return;
     const diffInSeconds = (current - start) / 1000;
     
     var seconds = Math.floor(diffInSeconds % 60);
-    var ms = Math.floor((diffInSeconds - seconds) * 1000);
+    var ms = Math.floor((diffInSeconds - Math.floor(diffInSeconds)) * 1000);
     var minutes = Math.floor((diffInSeconds / 60) % 60);
     var hours = Math.floor(diffInSeconds / 60 / 60);
     const hoursString = hours.toString().padStart(2, '0');
@@ -42,5 +42,9 @@
     return `${hoursString}:${minutesString}:${secondsString}.${msString}`;
   }
 </script>
-
+<style>
+  span {
+    font-family: 'Roboto Mono', monospace;
+  }
+</style>
 <span>{formatTime(startTime, currentTime)}</span>
