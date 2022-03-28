@@ -15,13 +15,14 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [12.x]
+        node-version: [16.x]
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -34,3 +35,17 @@ jobs:
       # Runs a set of commands using the runners shell
       - run: npm ci
       - run: npm run build
+
+      # Creates dist folder
+      - run: mkdir www
+      - run: cp ./dist/bundle.js ./www/dist/
+      - run: cp ./index.html ./www/
+      
+      # Deploy to github pages
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4.2.5
+        with:
+          branch: gh-pages
+          folder: www
+
+      
