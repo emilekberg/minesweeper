@@ -38,7 +38,7 @@ jobs:
 
       # Creates dist folder
       - run: mkdir www
-      - run: cp ./dist/bundle.js ./www/dist/
+      - run: cp -R ./dist/ ./www/
       - run: cp ./index.html ./www/
       
       # Deploy to github pages
